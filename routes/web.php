@@ -10,6 +10,7 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+Route::patch('/tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
 
 Route::get('/dashboard', function () {
     return redirect()->route('tasks.index');

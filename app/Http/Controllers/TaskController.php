@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
         $tasks = Auth::user()->tasks()->latest()->get();
@@ -57,5 +60,14 @@ class TaskController extends Controller
         $task->delete();
 
         return redirect()->route('tasks.index')->with('success', 'Task deleted!');
+    }
+    public function toggle(Task $task)
+    {
+        $this->authorize('update', $task); // ensure only the owner can toggle
+
+        $task->is_complete = !$task->is_complete;
+        $task->save();
+
+        return redirect()->route('tasks.index')->with('success', 'Task status updated!');
     }
 }
