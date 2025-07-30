@@ -1,20 +1,63 @@
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                <div class="shrink-0 flex items-center gap-2">
+                    <img src="{{ asset('notebook.png') }}" alt="App Icon" class="w-6 h-6">
+                    <a href="{{ route('dashboard') }}" class="text-lg font-semibold">
+                        {{ config('app.name', 'To-Do App') }}
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <!-- Dark Mode Toggle -->
+                    <div x-data="{ dark: localStorage.getItem('theme') === 'dark' }"
+     x-init="
+        document.documentElement.classList.toggle('dark', dark);
+        $watch('dark', val => {
+            document.documentElement.classList.toggle('dark', val);
+            localStorage.setItem('theme', val ? 'dark' : 'light');
+        })
+     "
+     class="flex items-center ml-4"
+>
+    <button @click="dark = !dark"
+        class="transition-colors duration-200 p-2 rounded-full"
+        :class="dark ? 'bg-gray-700 text-yellow-400 hover:text-yellow-300' : 'bg-gray-200 text-gray-700 hover:text-gray-500'"
+        aria-label="Toggle Dark Mode">
+
+    <!-- Show Sun in Dark Mode -->
+    <svg x-show="dark" x-cloak xmlns="http://www.w3.org/2000/svg"
+         class="h-5 w-5"
+         fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 3v1m0 16v1m8.485-8.485h-1M4.515 12h-1
+                 m15.364 4.95l-.707-.707M6.343 6.343l-.707-.707
+                 m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707
+                 M12 5a7 7 0 100 14 7 7 0 000-14z" />
+    </svg>
+
+    <!-- Show Moon in Light Mode -->
+    <svg x-show="!dark" x-cloak xmlns="http://www.w3.org/2000/svg"
+         class="h-5 w-5"
+         fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+    </svg>
+</button>
+</div>
+
+
+                    <!-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
-                    </x-nav-link>
+                    </x-nav-link> -->
+
                 </div>
             </div>
 

@@ -7,15 +7,33 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
 
 class TaskController extends Controller
 {
     use AuthorizesRequests;
-    public function index()
-    {
-        $tasks = Auth::user()->tasks()->latest()->get();
-        return view('tasks.index', compact('tasks'));
+    public function index(Request $request)
+{
+    $query = Auth::user()->tasks()->orderBy('due_date');
+
+    // Filter by completion
+    if ($request->has('status') && in_array($request->status, ['complete', 'incomplete'])) {
+        $query->where('is_complete', $request->status === 'complete');
     }
+
+    // Search by title or description
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('title', 'like', '%' . $request->search . '%')
+              ->orWhere('description', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $tasks = $query->paginate(10)->withQueryString();
+
+    return view('tasks.index', compact('tasks'));
+}
 
     public function create()
     {
@@ -27,9 +45,11 @@ class TaskController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
+
         ]);
 
-        Auth::user()->tasks()->create($request->only('title', 'description'));
+        Auth::user()->tasks()->create($request->only('title', 'description', 'due_date', 'priority'));
 
         return redirect()->route('tasks.index')->with('success', 'Task added!');
     }
@@ -47,9 +67,11 @@ class TaskController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
+
         ]);
 
-        $task->update($request->only('title', 'description'));
+        $task->update($request->only('title', 'description', 'due_date', 'priority'));
 
         return redirect()->route('tasks.index')->with('success', 'Task updated!');
     }
